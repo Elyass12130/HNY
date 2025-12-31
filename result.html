@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Interactive Fireworks</title>
+<style>
+html, body {
+    margin:0;
+    padding:0;
+    overflow:hidden;
+    background:#000;
+    height:100%;
+    font-family: Arial, sans-serif;
+}
+canvas{
+    position:absolute;
+    top:0;
+    left:0;
+    z-index:0;
+    display:block;
+}
+#startOverlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.8);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    z-index:10;
+    color:#fff;
+    font-size:2em;
+    cursor:pointer;
+}
+#startOverlay img{
+    width:250px;
+    height:auto;
+    margin-bottom:20px;
+}
+#startOverlay span{
+    display:block;
+}
+
+#startOverlay span:hover{
+    color: aqua;
+    
+}
+</style>
+</head>
+<body>
+
+<div id="startOverlay">
+    <img src="333.gif" alt="Intro GIF">
+    <p style="font-size: 50%; text-align: center;" >I just wanna take a moment to thank u fro the bottom of my heart.<br> Ur kindness, support nd presence in my life mean more than words can express.<br> I am truly grateful to have a precious friend like u....<br>
+    I LOVE U SOOOOO MUCH</p>
+    <span>Click to Start</span>
+</div>
+
+<canvas id="c"></canvas>
+
+<script>
+
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+let width = window.innerWidth;
+let height = window.innerHeight;
+canvas.width = width;
+canvas.height = height;
+
+window.addEventListener("resize", ()=>{
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+    buildAllWords();
+});
+
+
+const words = ["HAPPY","NEW","YEAR","PARIOOO"];
+let allParticles = [];
+let fireworks = [];
+
+function buildAllWords(){
+    allParticles = [];
+    const off = document.createElement("canvas");
+    off.width = width;
+    off.height = height;
+    const offCtx = off.getContext("2d");
+
+    const fontSize = Math.min(width*0.12,120);
+    const gap = fontSize*1.5;
+
+    offCtx.fillStyle="#fff";
+    offCtx.font=`bold ${fontSize}px Arial`;
+    offCtx.textAlign="center";
+    offCtx.textBaseline="middle";
+
+    const startY = height/2 - ((words.length-1)*gap)/2;
+    words.forEach((w,i)=>offCtx.fillText(w, width/2, startY + i*gap));
+
+    const imgData = offCtx.getImageData(0,0,width,height).data;
+
+    for(let y=0;y<height;y+=5){
+        for(let x=0;x<width;x+=5){
+            if(imgData[(y*width+x)*4+3]>150){
+                allParticles.push(new Particle(x,y));
+            }
+        }
+    }
+}
+
+class Particle{
+    constructor(tx,ty){
+        this.tx = tx;
+        this.ty = ty;
+        this.x = Math.random()*width;
+        this.y = height + Math.random()*200;
+        this.vx = 0; this.vy = 0; this.arrived=false;
+    }
+    update(){
+        if(this.arrived) return;
+        const dx = this.tx - this.x;
+        const dy = this.ty - this.y;
+        this.vx += dx*0.003; this.vy += dy*0.003;
+        this.vx *= 0.85; this.vy *= 0.85;
+        this.x += this.vx; this.y += this.vy;
+        if(Math.abs(dx)<1 && Math.abs(dy)<1){ this.arrived=true; this.x=this.tx; this.y=this.ty; }
+    }
+    draw(){
+        ctx.fillStyle="#fff";
+        ctx.shadowBlur=6; ctx.shadowColor="#fff";
+        ctx.fillRect(this.x,this.y,2,2);
+        ctx.shadowBlur=0;
+    }
+}
+
+
+class Firework{
+    constructor(){
+        this.x=Math.random()*width; this.y=Math.random()*height*0.5;
+        this.particles=[];
+        for(let i=0;i<30;i++){
+            const a=Math.random()*2*Math.PI;
+            const s=Math.random()*3+1;
+            this.particles.push({x:this.x,y:this.y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:60,color:`hsl(${Math.random()*360},100%,60%)`});
+        }
+        this.life=60;
+    }
+    update(){ this.particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.02; p.life--; }); this.life--; }
+    draw(){ this.particles.forEach(p=>{ ctx.globalAlpha=p.life/60; ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,2,2); ctx.globalAlpha=1; }); }
+}
+
+
+let lastBoom=0;
+function syncFireworks(){
+    const now=performance.now();
+    if(now-lastBoom>600){ fireworks.push(new Firework()); lastBoom=now; }
+}
+
+
+const fireAudio = new Audio("firework.mp3");
+fireAudio.loop=true; fireAudio.volume=0;
+
+const videoAudio = document.createElement("video");
+videoAudio.src="video.mp4";
+videoAudio.loop=true; videoAudio.volume=0;
+videoAudio.style.display="none";
+document.body.appendChild(videoAudio);
+
+function fadeIn(media,target=1,speed=0.02){
+    const i=setInterval(()=>{ media.volume=Math.min(target,media.volume+speed); if(media.volume>=target) clearInterval(i); },30);
+}
+function fadeOut(media,speed=0.02){
+    const i=setInterval(()=>{ media.volume=Math.max(0,media.volume-speed); if(media.volume<=0){ media.pause(); clearInterval(i); } },30);
+}
+
+
+document.getElementById("startOverlay").addEventListener("click",()=>{
+    const overlay = document.getElementById("startOverlay");
+    overlay.style.display="none";
+
+    buildAllWords();
+
+    fireAudio.currentTime=0;
+    fireAudio.play().catch(()=>{});
+    fadeIn(fireAudio,1,0.02);
+
+    setTimeout(()=>{
+        fadeOut(fireAudio,0.02);
+        videoAudio.currentTime=0;
+        videoAudio.play().catch(()=>{});
+        fadeIn(videoAudio,1,0.02);
+    },13000);
+});
+
+
+function animate(){
+    ctx.fillStyle="rgba(0,0,0,0.25)";
+    ctx.fillRect(0,0,width,height);
+
+    syncFireworks();
+
+    fireworks.forEach(f=>{f.update(); f.draw();});
+    fireworks = fireworks.filter(f=>f.life>0);
+
+    allParticles.forEach(p=>{ p.update(); p.draw(); });
+
+    requestAnimationFrame(animate);
+}
+animate();
+
+</script>
+</body>
+</html>

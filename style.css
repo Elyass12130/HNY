@@ -1,0 +1,149 @@
+body {
+    font-family: serif;
+    background-color: rgb(21, 21, 21);
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+div {
+    position: relative;
+    height: 500px;
+    width: 400px;
+    border: 2px solid white;
+   
+}
+
+
+p{
+    position: absolute;
+    margin-top: 40%;
+    margin-left: 14%;
+    font-size: 40px;
+    font-weight: bolder;
+    text-transform: uppercase;
+    background-image: url(111.jpg);
+    color: transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+    background-size: 300% 300%;
+    animation: animate 5s ease infinite;
+
+   
+}
+.msg-btn {
+    background: #003653;
+    border-radius: 50px;
+    width: 59px;
+    height: 59px;
+    margin-top: 70%;
+    left: 50%;
+    transition: all 0.4s ease;
+    box-shadow: 0.4px 12px 10px rgba(1, 44, 95, 0.4);
+    transform: translateX(-50%);
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.msg-btn .icon {
+    color: rgb(246, 246, 246);
+    font-size: 30px;
+    transition: all 0.4s ease;
+    position: absolute;
+    opacity: 1;
+}
+
+.msg-btn .text {
+    font-weight: bold;
+    color: aliceblue;
+    font-size: 15px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+}
+
+.msg-btn:hover {
+    background: #054c72;
+    width: 150px;
+    box-shadow: 0 6px 20px rgba(25, 119, 242, .45);
+    cursor: pointer;
+}
+
+.msg-btn:hover .icon {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.msg-btn:hover .text {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+.heart-animation {
+    position: absolute;
+    border: none;
+    top: 20px;
+    left:30px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    
+}
+
+svg {
+    width: 80%;
+    max-width: 300px;
+    pointer-events: none;
+}
+
+svg #line {
+    fill: none;
+    stroke: #e00000;
+    stroke-width: 1.5;
+    stroke-linecap: butt;
+    stroke-linejoin: round;
+    stroke-miterlimit: 4;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: dash 3s linear infinite;
+}
+
+svg #point {
+    fill: none;
+    stroke: #f00000;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-miterlimit: 0.1;
+    stroke-dasharray: 0.0001, 0.9999;
+    stroke-dashoffset: 1;
+    animation: dash 3s linear infinite;
+    filter: url(#blur);
+}
+
+@keyframes dash {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+}
+
+
+ @keyframes animate {
+        0%{
+           background-position:0% ;
+        }
+        50%{
+            background-position:100%;
+        }
+        100%{
+          background-position:0%  
+        }
+        
+    }
